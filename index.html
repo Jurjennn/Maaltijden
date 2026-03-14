@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gezonde Maaltijden</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f7f2; color: #1a1a1a; min-height: 100vh; }
+:root {
+  --green: #3B6D11; --green-light: #EAF3DE; --green-mid: #639922;
+  --amber: #BA7517; --amber-light: #FAEEDA;
+  --surface: #ffffff; --surface2: #f5f7f2;
+  --border: rgba(0,0,0,0.1); --text: #1a1a1a; --muted: #666;
+  --radius: 12px; --radius-sm: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  body { background: #1a1f14; color: #e8f0df; }
+  :root {
+    --green: #97C459; --green-light: #1e2e10; --green-mid: #639922;
+    --amber: #FAC775; --amber-light: #2a1f08;
+    --surface: #242b1c; --surface2: #1a1f14;
+    --border: rgba(255,255,255,0.1); --text: #e8f0df; --muted: #8a9e78;
+  }
+}
+.app { max-width: 700px; margin: 0 auto; padding: 1rem 0.75rem 3rem; }
+.header { text-align: center; margin-bottom: 1.5rem; padding: 1.25rem; background: var(--green-light); border-radius: var(--radius); border: 0.5px solid var(--border); }
+.header h1 { font-size: 22px; font-weight: 600; color: var(--green); }
+.header p { font-size: 13px; color: var(--green-mid); margin-top: 4px; }
+.card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 0.75rem; }
+.card h3 { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.pill-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { cursor: pointer; padding: 5px 12px; border-radius: 20px; font-size: 13px; border: 0.5px solid var(--border); background: var(--surface2); color: var(--text); transition: all 0.15s; user-select: none; }
+.pill.active { background: var(--green-light); border-color: var(--green-mid); color: var(--green); font-weight: 500; }
+.pill:hover:not(.active) { border-color: var(--green-mid); }
+.input-row { display: flex; gap: 8px; }
+.input-row input { flex: 1; }
+input[type=text] { width: 100%; padding: 8px 12px; border-radius: var(--radius-sm); border: 0.5px solid var(--border); background: var(--surface2); color: var(--text); font-size: 14px; font-family: inherit; transition: border 0.15s; }
+input[type=text]:focus { outline: none; border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(99,153,34,0.12); }
+.tag { display: inline-flex; align-items: center; gap: 5px; border-radius: 12px; padding: 3px 8px 3px 10px; font-size: 12px; margin: 4px 4px 0 0; }
+.tag.include { background: var(--green-light); color: var(--green); }
+.tag.exclude { background: var(--amber-light); color: var(--amber); }
+.tag button { background: none; border: none; cursor: pointer; font-size: 14px; line-height: 1; padding: 0; color: inherit; opacity: 0.7; }
+.tag button:hover { opacity: 1; }
+.big-btn { width: 100%; padding: 13px; background: var(--green); color: white; border: none; border-radius: var(--radius); font-size: 16px; font-weight: 500; cursor: pointer; font-family: inherit; transition: opacity 0.15s, transform 0.1s; }
+.big-btn:hover { opacity: 0.9; }
+.big-btn:active { transform: scale(0.99); }
+.big-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.recipe-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 0.75rem; position: relative; }
+.recipe-title { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 8px; padding-right: 90px; }
+.recipe-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.badge { font-size: 11px; padding: 3px 9px; border-radius: 10px; font-weight: 500; }
+.badge.green { background: var(--green-light); color: var(--green); }
+.badge.amber { background: var(--amber-light); color: var(--amber); }
+.badge.gray { background: var(--surface2); color: var(--muted); border: 0.5px solid var(--border); }
+.stars { color: #BA7517; font-size: 13px; display: flex; align-items: center; gap: 4px; }
+.stars span { color: var(--muted); font-size: 12px; }
+.nutrition { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+.nut-box { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 14px; }
+.nut-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+.nut-val { font-size: 20px; font-weight: 600; color: var(--text); }
+.nut-unit { font-size: 12px; color: var(--muted); }
+.ingredients-list { margin: 6px 0; padding: 0; }
+.ingredients-list li { font-size: 13px; color: var(--text); padding: 3px 0 3px 14px; list-style: none; position: relative; line-height: 1.5; }
+.ingredients-list li::before { content: "·"; position: absolute; left: 0; color: var(--green-mid); font-size: 16px; line-height: 1.3; }
+.steps { margin-top: 8px; }
+.step { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
+.step-num { min-width: 22px; height: 22px; border-radius: 50%; background: var(--green-light); color: var(--green); font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.step-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+.save-btn { position: absolute; top: 1.25rem; right: 1.25rem; background: none; border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 5px 10px; font-size: 12px; cursor: pointer; color: var(--muted); font-family: inherit; transition: all 0.15s; }
+.save-btn:hover { border-color: var(--green-mid); color: var(--green); }
+.save-btn.saved { background: var(--green-light); border-color: var(--green-mid); color: var(--green); font-weight: 500; }
+.loading-box { text-align: center; padding: 2.5rem 1rem; color: var(--muted); font-size: 14px; }
+.spinner { width: 30px; height: 30px; border: 2px solid var(--border); border-top-color: var(--green-mid); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 14px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.tabs { display: flex; gap: 4px; border-bottom: 0.5px solid var(--border); margin-bottom: 1rem; }
+.tab { padding: 9px 18px; font-size: 14px; cursor: pointer; border: none; background: none; color: var(--muted); font-family: inherit; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+.tab.active { color: var(--green); border-bottom-color: var(--green); font-weight: 500; }
+.section { display: none; }
+.section.active { display: block; }
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 14px; }
+.empty-state p { margin-top: 8px; font-size: 12px; }
+.search-saved { width: 100%; margin-bottom: 1rem; }
+.recipe-expand-btn { background: none; border: none; color: var(--green); font-size: 13px; cursor: pointer; padding: 4px 0; font-family: inherit; display: flex; align-items: center; gap: 4px; }
+.details { display: none; margin-top: 12px; border-top: 0.5px solid var(--border); padding-top: 12px; }
+.details.open { display: block; }
+.section-label { font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+.error-box { background: #fff0f0; border: 0.5px solid #f0c0c0; border-radius: var(--radius); padding: 1rem 1.25rem; color: #a32d2d; font-size: 14px; margin-top: 1rem; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>Gezonde Maaltijden</h1>
+    <p>Recepten voor 2 personen &middot; max 30 min &middot; verkrijgbaar bij Albert Heijn</p>
+  </div>
+
+  <div id="apikey-card" class="card" style="border-color: #f0c060;">
+    <h3 style="color: var(--amber);">API-sleutel vereist</h3>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:10px; line-height:1.6;">
+      Om recepten te genereren heb je een Anthropic API-sleutel nodig.
+      Maak gratis een account aan op <a href="https://console.anthropic.com" target="_blank" style="color:var(--green)">console.anthropic.com</a>,
+      ga naar <em>API Keys</em> en maak een nieuwe sleutel aan.
+    </p>
+    <div class="input-row">
+      <input type="password" id="apikey-input" placeholder="sk-ant-..." style="flex:1; font-family: monospace; font-size:13px;" />
+      <button class="pill active" onclick="saveApiKey()" style="white-space:nowrap">Opslaan</button>
+    </div>
+    <p style="font-size:11px; color:var(--muted); margin-top:6px;">Je sleutel wordt alleen lokaal in je browser opgeslagen en nergens naartoe gestuurd.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('randomizer')">Maaltijdzoeker</button>
+    <button class="tab" onclick="switchTab('saved')">Opgeslagen <span id="saved-count"></span></button>
+  </div>
+
+  <div id="tab-randomizer" class="section active">
+    <div class="card">
+      <h3>Type maaltijd</h3>
+      <div class="pill-group">
+        <div class="pill active" data-group="meal" data-val="hoofdgerecht" onclick="togglePill(this)">Hoofdgerecht</div>
+        <div class="pill" data-group="meal" data-val="lunch" onclick="togglePill(this)">Lunch</div>
+        <div class="pill" data-group="meal" data-val="ontbijt" onclick="togglePill(this)">Ontbijt</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Dieet voorkeur</h3>
+      <div class="pill-group">
+        <div class="pill active" data-group="diet" data-val="vlees" onclick="togglePill(this)">Met vlees</div>
+        <div class="pill" data-group="diet" data-val="vis" onclick="togglePill(this)">Met vis</div>
+        <div class="pill" data-group="diet" data-val="vegetarisch" onclick="togglePill(this)">Vegetarisch</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Gebruik deze ingrediënten</h3>
+      <div class="input-row">
+        <input type="text" id="include-input" placeholder="bijv. kip, broccoli, courgette..." onkeydown="if(event.key==='Enter')addTag('include')" />
+        <button class="pill" style="white-space:nowrap" onclick="addTag('include')">+ Voeg toe</button>
+      </div>
+      <div id="include-tags" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <h3>Ingrediënten uitsluiten</h3>
+      <div class="input-row">
+        <input type="text" id="exclude-input" placeholder="bijv. noten, gluten, zuivel..." onkeydown="if(event.key==='Enter')addTag('exclude')" />
+        <button class="pill" style="white-space:nowrap" onclick="addTag('exclude')">+ Voeg toe</button>
+      </div>
+      <div id="exclude-tags" style="margin-top:8px"></div>
+    </div>
+    <button class="big-btn" id="gen-btn" onclick="generateRecipe()">Genereer gezond recept</button>
+    <div id="recipe-output" style="margin-top:1rem"></div>
+  </div>
+
+  <div id="tab-saved" class="section">
+    <input type="text" class="search-saved" placeholder="Zoek in opgeslagen recepten..." oninput="filterSaved(this.value)" />
+    <div class="pill-group" style="margin-bottom:1rem; flex-wrap:wrap; gap:6px;">
+      <div class="pill active" data-group="saved-meal" data-val="alle" onclick="toggleSavedFilter(this)">Alle maaltijden</div>
+      <div class="pill" data-group="saved-meal" data-val="hoofdgerecht" onclick="toggleSavedFilter(this)">Hoofdgerecht</div>
+      <div class="pill" data-group="saved-meal" data-val="lunch" onclick="toggleSavedFilter(this)">Lunch</div>
+      <div class="pill" data-group="saved-meal" data-val="ontbijt" onclick="toggleSavedFilter(this)">Ontbijt</div>
+    </div>
+    <div class="pill-group" style="margin-bottom:1rem; flex-wrap:wrap; gap:6px;">
+      <div class="pill active" data-group="saved-diet" data-val="alle" onclick="toggleSavedFilter(this)">Alle dieet</div>
+      <div class="pill" data-group="saved-diet" data-val="vegetarisch" onclick="toggleSavedFilter(this)">Vegetarisch</div>
+      <div class="pill" data-group="saved-diet" data-val="vis" onclick="toggleSavedFilter(this)">Vis</div>
+      <div class="pill" data-group="saved-diet" data-val="vlees" onclick="toggleSavedFilter(this)">Vlees</div>
+    </div>
+    <div id="saved-list"></div>
+  </div>
+</div>
+
+<script>
+function saveApiKey() {
+  const v = document.getElementById('apikey-input').value.trim();
+  if (!v.startsWith('sk-')) { alert('Voer een geldige API-sleutel in (begint met sk-ant-...)'); return; }
+  localStorage.setItem('anthropic_api_key', v);
+  document.getElementById('apikey-card').style.display = 'none';
+  document.getElementById('apikey-input').value = '';
+  alert('API-sleutel opgeslagen!');
+}
+function getApiKey() { return localStorage.getItem('anthropic_api_key') || ''; }
+function initApiKeyCard() {
+  if (getApiKey()) document.getElementById('apikey-card').style.display = 'none';
+}
+initApiKeyCard();
+
+const state = {
+  includes: [], excludes: [],
+  savedRecipes: JSON.parse(localStorage.getItem('gezond_saved_v2') || '[]'),
+  savedMealFilter: 'alle', savedDietFilter: 'alle', savedSearch: ''
+};
+
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', ['randomizer','saved'][i] === t));
+  document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  if (t === 'saved') renderSaved();
+}
+
+function togglePill(el) {
+  const g = el.dataset.group;
+  document.querySelectorAll(`[data-group="${g}"]`).forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function getActive(group) {
+  const el = document.querySelector(`[data-group="${group}"].active`);
+  return el ? el.dataset.val : '';
+}
+
+function addTag(type) {
+  const input = document.getElementById(type+'-input');
+  const v = input.value.trim();
+  if (v && !state[type+'s'].includes(v)) { state[type+'s'].push(v); renderTags(); }
+  input.value = '';
+  input.focus();
+}
+
+function renderTags() {
+  document.getElementById('include-tags').innerHTML = state.includes.map((t,i) =>
+    `<span class="tag include">${t}<button onclick="state.includes.splice(${i},1);renderTags()">×</button></span>`).join('');
+  document.getElementById('exclude-tags').innerHTML = state.excludes.map((t,i) =>
+    `<span class="tag exclude">${t}<button onclick="state.excludes.splice(${i},1);renderTags()">×</button></span>`).join('');
+}
+
+function stars(r) {
+  const full = Math.round(r);
+  return Array(5).fill(0).map((_,i) => `<span style="color:${i<full?'#BA7517':'#ccc'}">${i<full?'★':'☆'}</span>`).join('');
+}
+
+function saveRecipe(recipe) {
+  if (state.savedRecipes.find(r => r.title === recipe.title)) return;
+  state.savedRecipes.push(recipe);
+  persist();
+}
+function unsaveRecipe(title) {
+  state.savedRecipes = state.savedRecipes.filter(r => r.title !== title);
+  persist();
+}
+function persist() {
+  localStorage.setItem('gezond_saved_v2', JSON.stringify(state.savedRecipes));
+  updateSavedCount();
+}
+function updateSavedCount() {
+  const el = document.getElementById('saved-count');
+  el.textContent = state.savedRecipes.length ? `(${state.savedRecipes.length})` : '';
+}
+updateSavedCount();
+
+function recipeHTML(recipe, savedMode=false) {
+  const isSaved = !!state.savedRecipes.find(r => r.title === recipe.title);
+  const id = 'det-' + recipe.title.replace(/[^a-z0-9]/gi,'');
+  const safeRecipe = JSON.stringify(recipe).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  return `<div class="recipe-card" id="card-${id}">
+    ${savedMode
+      ? `<button class="save-btn saved" onclick="unsaveRecipe('${recipe.title.replace(/'/g,"\\'")}');document.getElementById('card-${id}').remove();updateSavedCount();">Verwijder</button>`
+      : `<button class="save-btn ${isSaved?'saved':''}" id="savebtn-${id}" onclick="handleSave(${safeRecipe},'${id}')">${isSaved?'✓ Bewaard':'Bewaar'}</button>`
+    }
+    <div class="recipe-title">${recipe.title}</div>
+    <div class="recipe-meta">
+      <span class="badge green">${recipe.mealType}</span>
+      <span class="badge amber">${recipe.dietType}</span>
+      <span class="badge gray">⏱ ${recipe.prepTime} min</span>
+      <div class="stars">${stars(recipe.rating)}<span>${recipe.rating} (${recipe.reviewCount} reviews)</span></div>
+    </div>
+    <div class="nutrition">
+      <div class="nut-box">
+        <div class="nut-label">Kcal per persoon</div>
+        <div class="nut-val">${recipe.kcal} <span class="nut-unit">kcal</span></div>
+      </div>
+      <div class="nut-box">
+        <div class="nut-label">Eiwitten per persoon</div>
+        <div class="nut-val">${recipe.protein} <span class="nut-unit">gram</span></div>
+      </div>
+    </div>
+    <button class="recipe-expand-btn" onclick="toggleDetails('${id}', this)">▾ Toon ingrediënten &amp; bereiding</button>
+    <div class="details" id="${id}">
+      <div class="section-label" style="margin-top:4px">Ingrediënten (2 personen)</div>
+      <ul class="ingredients-list">${recipe.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul>
+      <div class="section-label" style="margin-top:14px">Bereiding</div>
+      <div class="steps">${recipe.steps.map((s,i)=>`<div class="step"><div class="step-num">${i+1}</div><div class="step-text">${s}</div></div>`).join('')}</div>
+    </div>
+  </div>`;
+}
+
+function toggleDetails(id, btn) {
+  const el = document.getElementById(id);
+  const open = el.classList.toggle('open');
+  btn.textContent = open ? '▴ Verberg details' : '▾ Toon ingrediënten & bereiding';
+}
+
+function handleSave(recipe, id) {
+  const already = state.savedRecipes.find(r => r.title === recipe.title);
+  if (already) {
+    unsaveRecipe(recipe.title);
+    const btn = document.getElementById('savebtn-'+id);
+    if (btn) { btn.textContent='Bewaar'; btn.classList.remove('saved'); }
+  } else {
+    saveRecipe(recipe);
+    const btn = document.getElementById('savebtn-'+id);
+    if (btn) { btn.textContent='✓ Bewaard'; btn.classList.add('saved'); }
+  }
+}
+
+function renderSaved() {
+  const list = document.getElementById('saved-list');
+  let recipes = [...state.savedRecipes];
+  if (state.savedMealFilter !== 'alle') recipes = recipes.filter(r => r.mealType === state.savedMealFilter);
+  if (state.savedDietFilter !== 'alle') recipes = recipes.filter(r => r.dietType === state.savedDietFilter);
+  if (state.savedSearch) recipes = recipes.filter(r =>
+    r.title.toLowerCase().includes(state.savedSearch) ||
+    r.ingredients.join(' ').toLowerCase().includes(state.savedSearch));
+  if (!recipes.length) {
+    list.innerHTML = `<div class="empty-state">Geen opgeslagen recepten gevonden.<p>Genereer een recept en klik op "Bewaar" om het hier op te slaan.</p></div>`;
+    return;
+  }
+  list.innerHTML = recipes.map(r => recipeHTML(r, true)).join('');
+}
+
+function toggleSavedFilter(el) {
+  const group = el.dataset.group;
+  document.querySelectorAll(`[data-group="${group}"]`).forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  if (group === 'saved-meal') state.savedMealFilter = el.dataset.val;
+  else state.savedDietFilter = el.dataset.val;
+  renderSaved();
+}
+
+function filterSaved(v) { state.savedSearch = v.toLowerCase(); renderSaved(); }
+
+async function generateRecipe() {
+  const btn = document.getElementById('gen-btn');
+  const out = document.getElementById('recipe-output');
+  const mealType = getActive('meal');
+  const dietType = getActive('diet');
+  const savedTitles = state.savedRecipes.map(r => r.title).join(', ');
+
+  btn.disabled = true;
+  out.innerHTML = '<div class="loading-box"><div class="spinner"></div>Recept wordt gegenereerd...</div>';
+
+  const prompt = `Je bent een gezonde maaltijdassistent voor Nederland. Genereer een gezond recept met deze specificaties:
+- Type maaltijd: ${mealType}
+- Dieet: ${dietType}
+- Ingrediënten die MOETEN worden gebruikt (indien opgegeven): ${state.includes.join(', ') || 'geen voorkeur'}
+- Ingrediënten die ABSOLUUT NIET mogen voorkomen: ananas${state.excludes.length ? ', ' + state.excludes.join(', ') : ''}
+- Maximaal 30 minuten bereidingstijd
+- Voor 2 personen
+- Gezond: geen ultra-bewerkt voedsel, weinig/geen suiker, weinig/geen ongezonde vetten, hoog in vezels
+- Alle ingrediënten zijn verkrijgbaar bij Albert Heijn Nederland
+- Geef GEEN van deze al opgeslagen recepten: ${savedTitles || 'geen'}
+- Kies recepten met hoge beoordeling (4.0+) en veel reviews (50+) - simuleer realistische review scores
+
+Reageer UITSLUITEND met geldig JSON (geen markdown, geen uitleg, geen tekst eromheen):
+{
+  "title": "Naam van het gerecht",
+  "mealType": "${mealType}",
+  "dietType": "${dietType}",
+  "prepTime": 25,
+  "kcal": 420,
+  "protein": 32,
+  "rating": 4.5,
+  "reviewCount": 127,
+  "ingredients": ["200g kipfilet", "1 courgette", "2 el olijfolie", "..."],
+  "steps": ["Verhit de olijfolie in een pan...", "Voeg de kip toe...", "..."]
+}`;
+
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    document.getElementById('apikey-card').style.display = 'block';
+    out.innerHTML = '<div class="error-box">Vul eerst je API-sleutel in bovenaan de pagina.</div>';
+    btn.disabled = false;
+    return;
+  }
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    if (!res.ok) throw new Error('API error: ' + res.status);
+    const data = await res.json();
+    const text = data.content.map(i => i.text || '').join('');
+    const clean = text.replace(/```json|```/g, '').trim();
+    const recipe = JSON.parse(clean);
+    out.innerHTML = recipeHTML(recipe, false);
+  } catch(e) {
+    out.innerHTML = `<div class="error-box">Er ging iets mis bij het genereren. Controleer je internetverbinding en probeer opnieuw.<br><small style="opacity:0.6">${e.message}</small></div>`;
+  }
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>
